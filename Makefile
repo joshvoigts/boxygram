@@ -1,2 +1,2 @@
 serve:
-	cargo watch -x run --why
+	cargo watch -i "*.db" -x run --why

@@ -1,7 +1,9 @@
-use crate::p;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 use tera::{Context, Tera};
+use tokio::sync::broadcast;
 
 pub struct AppConfig {
    pub bind_address: String,
@@ -33,12 +35,15 @@ impl AppConfig {
 }
 
 #[derive(Clone)]
-pub struct AppData {
+pub struct AppState {
+   pub channels: HashMap<String, broadcast::Sender<String>>,
    pub tera: Tera,
 }
 
+pub type SharedAppState = Arc<Mutex<AppState>>;
+
 pub fn build_static(tera: &Tera) {
-   p!("Building static pages");
+   println!("Building static pages");
    let static_dir = Path::new("./web/static");
    let site_dir = static_dir.join("site");
    if site_dir.exists() {

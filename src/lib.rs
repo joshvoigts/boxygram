@@ -1,6 +1,7 @@
 pub mod app;
 pub mod controller;
+pub mod db;
 pub mod error;
-pub mod p;
-pub mod route;
+pub mod model;
 pub mod responder;
+pub mod ws;

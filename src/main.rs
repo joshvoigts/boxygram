@@ -3,10 +3,13 @@
 extern crate boxygram_server;
 use actix_files::Files;
 use boxygram_server::app;
-use boxygram_server::route;
+use boxygram_server::controller;
+use boxygram_server::ws;
+use std::collections::HashMap;
 
 use actix_web::{middleware, web, App, HttpServer};
 use std::io;
+use std::sync::{Arc, Mutex};
 use tera::Tera;
 
 #[actix_web::main]
@@ -27,14 +30,22 @@ async fn main() -> io::Result<()> {
       config.bind_port
    );
 
-   let app_data = app::AppData { tera: tera };
+   let app_state = Arc::new(Mutex::new(app::AppState {
+      channels: HashMap::new(),
+      tera: tera,
+   }));
 
    HttpServer::new(move || {
       App::new()
-         .app_data(web::Data::new(app_data.clone()))
+         .app_data(web::Data::new(app_state.clone()))
          .wrap(middleware::Logger::default())
          .wrap(middleware::Compress::default())
-         .configure(route::service_config)
+         .route(
+            "/arena/new",
+            web::get().to(controller::get_new_arena),
+         )
+         .route("/arena/{id}", web::get().to(controller::get_arena))
+         .route("/arena/{id}/ws", web::get().to(ws::arena))
          .service(
             Files::new("/", config.static_path.clone())
                .index_file("index.html")
