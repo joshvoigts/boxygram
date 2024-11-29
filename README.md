@@ -1,33 +1,20 @@
-# vecbit
+# Boxygram
 
-An app for offering "bools as a service".
+A web server for collaborative drawing.
 
-## Why?
+1. Go to the site index
+2. Click "new"
+3. Share the link to the drawing box with someone else
 
-An excuse for learning how to implement rust web APIs and
-web API authentication.
 
 ## Setup
 
-Generate a master session key: 
+    git clone https://github.com/joshvoigts/boxygram.git
+    cd boxygram
+    cat ddl/init.sql | sqlite3 drawings.db
 
-    cargo run gen_session_master
+    # Optionally, set config vars by creating a `.env` file:
+    BOXY_BIND_ADDRESS="0.0.0.0"
+    BOXY_BIND_PORT=80
 
-Create a `.env` file:
-
-    VECB_SESSION_MASTER_KEY={master session key}
-    VECB_BIND_ADDRESS="127.0.0.1"
-    VECB_BIND_PORT=8080
-    VECB_DB_PATH="db.sqlite"
-    VECB_ENV="development"
-    VECB_SMTP_EMAIL={email for smtp server}
-    VECB_SMTP_PASSWORD={password for smtp server}
-    VECB_STATIC_PATH="web/static"
-
-Create the db:
-
-    cargo run init_db
-
-Run:
-
-    cargo run
+    make serve
