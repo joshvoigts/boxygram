@@ -1,5 +1,5 @@
 [package]
-name = "boxygram_server"
+name = "boxygram"
 version = "0.1.0"
 edition = "2021"
 
@@ -16,8 +16,6 @@ log = "0.4.20"
 rusqlite = "0.32.1"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = "1.0.111"
-tera = "1.19.1"
 thiserror = "1.0.59"
-time = { version = "0.3.36", features = ["serde"] }
 tokio = "1.41.1"
-uuid = { version = "1.6.1", features = ["v4", "serde"] }
+uuid = { version = "1.11.0", features = ["v4", "fast-rng"] }

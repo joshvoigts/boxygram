@@ -1,30 +1,44 @@
 use crate::error::AppError;
 use crate::model::DrawingState;
-use rusqlite::{params, Connection};
+use rusqlite::params;
+use rusqlite::Connection;
 use serde_json;
 
+// pub fn get_trans() -> Result<Connection, AppError> {
+//    let mut conn = Connection::open("drawings.db")?;
+//    Ok(conn.transaction()?)
+// }
+
 pub fn save_full_state(
+   conn: &Connection,
    arena_id: &str,
    drawing_state: &DrawingState,
 ) -> Result<(), AppError> {
-   let conn = Connection::open("drawings.db")?;
-
-   let drawing_state_json = serde_json::to_string(drawing_state)?;
+   let drawing_state_lines =
+      serde_json::to_string(&drawing_state.lines)?;
 
    conn.execute(
-        "INSERT OR REPLACE INTO drawing_state (arena_id, lines, modified) VALUES (?1, ?2, ?3)",
-        params![arena_id, drawing_state_json, &drawing_state.modified],
-    )?;
+      r#"
+         INSERT OR REPLACE INTO drawing_state
+         (arena_id, lines, modified)
+         VALUES
+         (?1, ?2, ?3)
+      "#,
+      params![arena_id, drawing_state_lines, &drawing_state.modified],
+   )?;
    Ok(())
 }
 
 pub fn load_full_state(
+   conn: &Connection,
    arena_id: &str,
 ) -> Result<DrawingState, AppError> {
-   let conn = Connection::open("drawings.db")?;
-
    let mut stmt = conn.prepare(
-      "SELECT lines, modified FROM drawing_state WHERE arena_id = ?1",
+      r#"
+         SELECT lines, modified
+         FROM drawing_state
+         WHERE arena_id = ?1
+      "#,
    )?;
    let (lines_json, modified) =
       stmt.query_row(params![arena_id], |row| {
@@ -35,9 +49,10 @@ pub fn load_full_state(
       })?;
 
    // Deserialize the JSON string into a DrawingState struct
-   let drawing_state: DrawingState =
-      serde_json::from_str(&lines_json)?;
-   dbg!(&drawing_state);
+   let drawing_state = DrawingState {
+      lines: serde_json::from_str(&lines_json)?,
+      modified: modified,
+   };
 
    Ok(drawing_state)
 }

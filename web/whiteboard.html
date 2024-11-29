@@ -3,34 +3,49 @@
    <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link rel="stylesheet" href="/global.css" />
+      <link rel="stylesheet" href="/static/global.css" />
       <style>
-        html {
-          width:  100%;
+        html, body {
+          width: 100%;
           height: 100%;
           margin: 0;
-        }
-        body {
           display: flex;
           justify-content: center;
           align-items: center;
-          height: 100vh;
-          margin: 0;
           background-color: black;
         }
         canvas {
+          width: 100%; /* Scales the canvas to fill its parent */
+          max-width: 800px; /* Limit scaling on larger screens */
+          height: auto; /* Preserve aspect ratio */
+          touch-action: none; /* Disable touch actions */
           background-color: white;
-          touch-action: none; /* Disables all touch actions (scrolling, zooming, etc.) */
-          max-width: 100%;
-          height: auto;
+        }
+        .wrap {
+          position: relative;
+        }
+        .drawing-buttons {
+          position: absolute;
+          left: 10px;
+          top: 16px;
+        }
+        button {
+           background-color: transparent;
+           font-size: 0;
+           padding: 0;
+           margin: 0;
+           cursor: pointer;
         }
       </style>
    </head>
    <body>
       <div class="wrap">
+         <div class="drawing-buttons">
+            <button id="clear-button" type="button"><img src="/static/clear_button.png" width=30 height=30></button>
+         </div>
          <canvas id="drawingCanvas" width="800" height="800"></canvas>
       </div>
-      <script src="/script.js"></script>
+      <script src="/static/reconnecting-websocket.min.js"></script>
+      <script src="/static/script.js"></script>
    </body>
 </html>
-

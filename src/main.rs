@@ -1,29 +1,33 @@
-// #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-extern crate boxygram_server;
+extern crate boxygram;
 use actix_files::Files;
-use boxygram_server::app;
-use boxygram_server::controller;
-use boxygram_server::ws;
+use boxygram::{app, controller, ws};
 use std::collections::HashMap;
 
 use actix_web::{middleware, web, App, HttpServer};
 use std::io;
+use std::io::Write;
 use std::sync::{Arc, Mutex};
-use tera::Tera;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
    dotenvy::dotenv().ok();
 
-   let tera =
-      Tera::new("web/**/*.html").expect("Failed to render templates");
-
    let config = app::AppConfig::new_from_env();
 
-   env_logger::init_from_env(
-      env_logger::Env::new().default_filter_or("info"),
-   );
+   env_logger::Builder::new()
+      .format(|buf, record| {
+         writeln!(
+            buf,
+            "{}:{} {} [{}] {}",
+            record.file().unwrap_or("unknown"),
+            record.line().unwrap_or(0),
+            chrono::Local::now().format("%Y-%m-%dT%H:%M:%S"),
+            record.level(),
+            record.args()
+         )
+      })
+      .init();
+
    log::info!(
       "starting server at http://{}:{}",
       config.bind_address,
@@ -32,7 +36,6 @@ async fn main() -> io::Result<()> {
 
    let app_state = Arc::new(Mutex::new(app::AppState {
       channels: HashMap::new(),
-      tera: tera,
    }));
 
    HttpServer::new(move || {
@@ -40,15 +43,12 @@ async fn main() -> io::Result<()> {
          .app_data(web::Data::new(app_state.clone()))
          .wrap(middleware::Logger::default())
          .wrap(middleware::Compress::default())
-         .route(
-            "/arena/new",
-            web::get().to(controller::get_new_arena),
-         )
-         .route("/arena/{id}", web::get().to(controller::get_arena))
-         .route("/arena/{id}/ws", web::get().to(ws::arena))
+         .route("/", web::get().to(controller::get_index))
+         .route("/new", web::get().to(controller::get_new))
+         .route("/{id}", web::get().to(controller::get_arena))
+         .route("/{id}/ws", web::get().to(ws::arena))
          .service(
-            Files::new("/", config.static_path.clone())
-               .index_file("index.html")
+            Files::new("/static", config.static_path.clone())
                .prefer_utf8(true),
          )
    })

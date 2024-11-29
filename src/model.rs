@@ -25,9 +25,21 @@ pub struct DrawingState {
 impl DrawingState {
    // Helper function to create a new DrawingState with current timestamp
    pub fn new() -> Self {
-      DrawingState {
+      Self {
          lines: Vec::new(),
          modified: Utc::now().to_rfc3339(),
       }
+   }
+
+   pub fn from_lines(lines: Vec<Line>) -> Self {
+      Self {
+         lines: lines,
+         modified: Utc::now().to_rfc3339(),
+      }
+   }
+
+   pub fn add_line(&mut self, line: Line) {
+      self.lines.push(line);
+      self.modified = Utc::now().to_rfc3339();
    }
 }

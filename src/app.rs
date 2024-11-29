@@ -1,8 +1,5 @@
 use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
 use std::sync::{Arc, Mutex};
-use tera::{Context, Tera};
 use tokio::sync::broadcast;
 
 pub struct AppConfig {
@@ -37,30 +34,6 @@ impl AppConfig {
 #[derive(Clone)]
 pub struct AppState {
    pub channels: HashMap<String, broadcast::Sender<String>>,
-   pub tera: Tera,
 }
 
 pub type SharedAppState = Arc<Mutex<AppState>>;
-
-pub fn build_static(tera: &Tera) {
-   println!("Building static pages");
-   let static_dir = Path::new("./web/static");
-   let site_dir = static_dir.join("site");
-   if site_dir.exists() {
-      fs::remove_dir_all(site_dir).unwrap();
-   }
-   for tmpl in tera.get_template_names() {
-      let path = Path::new(tmpl);
-      if !path.starts_with("site") {
-         continue;
-      }
-      let dir = static_dir.join(path.parent().unwrap());
-      fs::create_dir_all(dir).unwrap();
-      let context = Context::new();
-      let file = fs::File::create(static_dir.join(tmpl)).unwrap();
-      let res = tera.render_to(tmpl, &context, file);
-      if res.is_err() {
-         println!("failed to render: {}", tmpl);
-      }
-   }
-}
