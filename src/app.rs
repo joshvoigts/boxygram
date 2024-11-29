@@ -12,15 +12,15 @@ pub struct AppConfig {
 impl AppConfig {
    pub fn new_from_env() -> Self {
       let bind_address = std::env::var("BOXY_BIND_ADDRESS")
-         .expect("BOXY_BIND_ADDRESS must be set");
+         .unwrap_or("127.0.0.1".to_string());
       let bind_port: u16 = std::env::var("BOXY_BIND_PORT")
-         .expect("BOXY_BIND_PORT must be set")
+         .unwrap_or("8080".to_string())
          .parse()
          .expect("BOXY_BIND_PORT must be a u16");
-      let environment =
-         std::env::var("BOXY_ENV").expect("BOXY_ENV must be set");
+      let environment = std::env::var("BOXY_ENV")
+         .unwrap_or("development".to_string());
       let static_path = std::env::var("BOXY_STATIC_PATH")
-         .expect("BOXY_STATIC_PATH must be set");
+         .unwrap_or("web".to_string());
 
       AppConfig {
          bind_address: bind_address,
